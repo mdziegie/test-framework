@@ -54,6 +54,14 @@ class Fio:
         return datetime.timedelta(seconds=total_time)
 
     def run(self, timeout: datetime.timedelta = None):
+        timeout = self.prepare_run(timeout)
+        return self.executor.run(str(self), timeout)
+
+    def run_in_background(self, timeout: datetime.timedelta = None):
+        self.prepare_run(timeout)
+        return self.executor.run_in_background(str(self))
+
+    def prepare_run(self, timeout: datetime.timedelta = None):
         if not self.is_installed():
             self.install()
 
@@ -64,7 +72,7 @@ class Fio:
             self.executor.run(f"{str(self)}-showcmd -")
             TestRun.LOGGER.info(self.executor.run(f"cat {self.fio_file}").stdout)
         TestRun.LOGGER.info(str(self))
-        return self.executor.run(str(self), timeout)
+        return timeout
 
     def execution_cmd_parameters(self):
         if len(self.jobs) > 0:
